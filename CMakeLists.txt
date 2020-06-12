@@ -20,8 +20,6 @@ include_directories(${PUREDATA_INCLUDE_DIRS} ${GEM_INCLUDE_DIRS} ${GEM_INCLUDE_D
 
 find_package(MPV 0.27.2 REQUIRED)
 
-message(STATUS "MPV include dir: ${MPV_INCLUDE_DIR}")
-message(STATUS "MPV lib : ${MPV_LIBRARY}")
 set(PD_INSTALL_FOLDER "${CMAKE_BINARY_DIR}/package/mpv")
 message(STATUS "pd-mpv install dir : ${PD_NDI_INSTALL_FOLDER}")
 
@@ -54,7 +52,19 @@ if(APPLE)
       PROPERTIES
       INSTALL_RPATH "@loader_path"
     )
-elseif(UNIX)
+
+    get_filename_component(LIBMPV_DIRECTORY ${MPV_LIBRARY} DIRECTORY)
+    get_filename_component(LIBMPV_BASENAME ${MPV_LIBRARY} NAME_WE)
+    get_filename_component(MPV_LIBRARY ${MPV_LIBRARY} NAME)
+    file(GLOB MPV_LIBS_TO_INSTALL
+        LIST_DIRECTORIES false
+        "${LIBMPV_DIRECTORY}/${LIBMPV_BASENAME}*"
+        )
+    set_target_properties(${PROJECT_NAME}
+      PROPERTIES
+      LINK_DIRECTORIES "${LIBMPV_DIRECTORY}"
+    )
+elseif()
     if(${OSSIA_ARCHITECTURE} MATCHES "arm")
         set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".l_arm")
     elseif(${OSSIA_ARCHITECTURE} MATCHES "x86")
@@ -66,7 +76,12 @@ elseif(UNIX)
       PROPERTIES
       INSTALL_RPATH "$ORIGIN"
     )
+    file(GLOB MPV_LIBS_TO_INSTALL
+      LIST_DIRECTORIES false
+      "${MPV_LIBRARY}*")
 endif()
+
+message(STATUS "MPV library : ${MPV_LIBRARY}")
 
 target_link_libraries(${PROJECT_NAME} ${MPV_LIBRARY})
 
@@ -77,14 +92,7 @@ install(TARGETS ${PROJECT_NAME}
                 WORLD_READ WORLD_EXECUTE
 )
 
-if(APPLE)
-set(MPV_LIBS_TO_INSTALL ${MPV_LIBRARY})
-else()
-file(GLOB MPV_LIBS_TO_INSTALL
-     LIST_DIRECTORIES false
-     "${MPV_LIBRARY}*")
-endif()
-
+message(STATUS "Library to install: ${MPV_LIBS_TO_INSTALL}")
 install(FILES
   ${CMAKE_CURRENT_LIST_DIR}/mpv-help.pd
   ${CMAKE_CURRENT_LIST_DIR}/License.txt
