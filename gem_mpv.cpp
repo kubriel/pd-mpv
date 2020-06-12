@@ -26,7 +26,7 @@ static void * get_proc_address_mpv (void *fn_ctx, const char *name)
 {
     NSSymbol symbol;
     char *symbolName;
-    symbolName = malloc (strlen (name) + 2); // 1
+    symbolName = (char*)malloc (strlen (name) + 2); // 1
     strcpy(symbolName + 1, name); // 2
     symbolName[0] = '_'; // 3
     symbol = NULL;
