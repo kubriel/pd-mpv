@@ -432,7 +432,7 @@ void mpv::startRendering(void)
   mpv_opengl_fbo mpfbo{static_cast<int>(m_frameBufferIndex), m_width, m_height, 0};
   mpv_opengl_init_params gl_init_params{get_proc_address_mpv, nullptr, nullptr};
   int flip_y{1};
-  
+
   mpv_render_param params[] = {
         {MPV_RENDER_PARAM_API_TYPE, const_cast<char *>(MPV_RENDER_API_TYPE_OPENGL)},
         {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
