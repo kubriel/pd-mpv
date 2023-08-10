@@ -212,6 +212,14 @@ mpv::mpv(int argc, t_atom*argv)
     return;
   }*/
 
+// sometimes i use it with jack for audio playback
+/*if (mpv_set_option_string(m_mpv, "ao", "jack") < 0)
+  {
+    error("failed to set hwdec");
+    return;
+  }*/
+
+
   mpv_request_event(m_mpv, MPV_EVENT_TICK, 1);
   mpv_set_wakeup_callback(m_mpv, wakeup, this);
 }
