@@ -26,7 +26,7 @@ static void * get_proc_address_mpv (void *fn_ctx, const char *name)
 {
     NSSymbol symbol;
     char *symbolName;
-    symbolName = malloc (strlen (name) + 2); // 1
+    symbolName = (char*)malloc (strlen (name) + 2); // 1
     strcpy(symbolName + 1, name); // 2
     symbolName[0] = '_'; // 3
     symbol = NULL;
@@ -198,11 +198,19 @@ mpv::mpv(int argc, t_atom*argv)
 
   // Actually using the opengl_cb state has to be explicitly requested.
   // Otherwise, mpv will create a separate platform window.
-  if (mpv_set_option_string(m_mpv, "vo", "opengl-cb") < 0)
+  if (mpv_set_option_string(m_mpv, "vo", "libmpv") < 0)
+  //if (mpv_set_option_string(m_mpv, "vo", "vdpau") < 0)
   {
     error("failed to set VO");
     return;
   }
+
+// i hope to use it with vaapi hardware decoding at some point
+/*if (mpv_set_option_string(m_mpv, "hwdec", "vaapi") < 0)
+  {
+    error("failed to set hwdec");
+    return;
+  }*/
 
   mpv_request_event(m_mpv, MPV_EVENT_TICK, 1);
   mpv_set_wakeup_callback(m_mpv, wakeup, this);
@@ -369,7 +377,18 @@ void mpv::render(GemState *state)
     gemframebuffer::render(state);
     if(m_mpv_gl)
     {
-      mpv_opengl_cb_draw(m_mpv_gl, m_frameBufferIndex, m_width, m_height);
+      mpv_opengl_fbo mpfbo{static_cast<int>(m_frameBufferIndex), m_width, m_height, 0};
+      mpv_opengl_init_params gl_init_params{get_proc_address_mpv, nullptr, nullptr};
+      int flip_y{1};
+      mpv_render_param params[] = {
+        {MPV_RENDER_PARAM_API_TYPE, const_cast<char *>(MPV_RENDER_API_TYPE_OPENGL)},
+        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
+        {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
+        {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
+        //{MPV_RENDER_PARAM_X11_DISPLAY, dpy},
+        {MPV_RENDER_PARAM_INVALID, nullptr}
+      };
+      mpv_render_context_render(m_mpv_gl, params);
     }
   }
 }
@@ -389,18 +408,33 @@ void mpv::startRendering(void)
   if(!m_mpv)
     return;
 
+  // not necessary with render API
   // The OpenGL API is somewhat separate from the normal mpv API. This only
   // returns NULL if no OpenGL support is compiled.
-  m_mpv_gl = static_cast<mpv_opengl_cb_context*>(mpv_get_sub_api(m_mpv, MPV_SUB_API_OPENGL_CB));
-  if (!m_mpv_gl)
+  //m_mpv_gl = static_cast<mpv_render_context*>(mpv_get_sub_api(m_mpv, MPV_SUB_API_OPENGL_CB));
+  //mpv_render_context *m_mpv_gl;
+  /*if (!m_mpv_gl)
   {
     error("failed to create mpv GL API handle");
     return;
-  }
+  }*/
 
   // This makes mpv use the currently set GL context. It will use the callback
   // to resolve GL builtin functions, as well as extensions.
-  if (mpv_opengl_cb_init_gl(m_mpv_gl, NULL, get_proc_address_mpv, NULL) < 0)
+  mpv_opengl_fbo mpfbo{static_cast<int>(m_frameBufferIndex), m_width, m_height, 0};
+  mpv_opengl_init_params gl_init_params{get_proc_address_mpv, nullptr, nullptr};
+  int flip_y{1};
+  
+  mpv_render_param params[] = {
+        {MPV_RENDER_PARAM_API_TYPE, const_cast<char *>(MPV_RENDER_API_TYPE_OPENGL)},
+        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
+        {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
+        {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
+//        {MPV_RENDER_PARAM_X11_DISPLAY, dpy},
+        {MPV_RENDER_PARAM_INVALID, nullptr}
+      };
+  //if (mpv_render_context_create(m_mpv_gl, NULL, get_proc_address_mpv, NULL) < 0)
+  if (mpv_render_context_create(&m_mpv_gl, m_mpv, params) < 0)
   {
     error("failed to initialize mpv GL context");
     return;
@@ -414,7 +448,7 @@ void mpv::stopRendering(void)
   gemframebuffer::stopRendering();
 
   if(m_mpv_gl)
-    mpv_opengl_cb_uninit_gl(m_mpv_gl);
+    mpv_render_context_free(m_mpv_gl);
 }
 
 void mpv::command_mess(t_symbol *s, int argc, t_atom *argv)

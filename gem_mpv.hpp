@@ -3,7 +3,7 @@
 #include "gemframebuffer.h"
 
 #include <mpv/client.h>
-#include <mpv/opengl_cb.h>
+#include <mpv/render_gl.h>
 
 #include <atomic>
 #include <string.h>
@@ -181,7 +181,7 @@ class GEM_EXTERN mpv : public gemframebuffer
 
     mpv_handle* m_mpv{};
 
-    mpv_opengl_cb_context* m_mpv_gl{};
+    mpv_render_context* m_mpv_gl{};
 
     bool m_pause{};
     std::atomic_bool m_event_flag; // flag rised when new event arrived
