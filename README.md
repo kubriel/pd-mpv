@@ -1,4 +1,4 @@
-This project moved here : https://gitlab.com/antoine.villeret/pd-mpv
+This is pd-mpv updated for libmpv render api.
 
 # gem-mpv
 
