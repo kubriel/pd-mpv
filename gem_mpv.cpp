@@ -292,18 +292,22 @@ void mpv::render(GemState *state)
         mpv_get_property_async(m_mpv, 'd', "duration", MPV_FORMAT_DOUBLE);
         break;
       }
-#if MPV_ENABLE_DEPRECATED
+/*DEPRECATED
+#ifdef MPV_ENABLE_DEPRECATED
       case MPV_EVENT_TRACKS_CHANGED:
       case MPV_EVENT_TRACK_SWITCHED:
         break;
 #endif
+*/
       case MPV_EVENT_IDLE:
         break;
+/*DEPRECATED
 #ifdef MPV_ENABLE_DEPRECATED
       case MPV_EVENT_PAUSE:
       case MPV_EVENT_UNPAUSE:
         break;
 #endif
+*/
       case MPV_EVENT_TICK:
       {
         m_new_frame=true;
@@ -331,18 +335,22 @@ void mpv::render(GemState *state)
         */
         break;
       }
+/*DEPRECATED
 #ifdef MPV_ENABLE_DEPRECATED
       case MPV_EVENT_SCRIPT_INPUT_DISPATCH:
         break;
 #endif
+*/
       case MPV_EVENT_CLIENT_MESSAGE:
       case MPV_EVENT_VIDEO_RECONFIG:
       case MPV_EVENT_AUDIO_RECONFIG:
         break;
+/*DEPRECATED
 #ifdef MPV_ENABLE_DEPRECATED
       case MPV_EVENT_METADATA_UPDATE:
         break;
 #endif
+*/
       case MPV_EVENT_SEEK:
       case MPV_EVENT_PLAYBACK_RESTART:
         m_started = true;
@@ -356,10 +364,12 @@ void mpv::render(GemState *state)
         handle_prop_event(prop);
         break;
       }
+/*DEPRECATED
 #ifdef MPV_ENABLE_DEPRECATED
       case MPV_EVENT_CHAPTER_CHANGE:
         break;
 #endif
+*/
       case MPV_EVENT_QUEUE_OVERFLOW:
       // case MPV_EVENT_HOOK: // not yet available in v0.27.2
         break;
@@ -386,7 +396,7 @@ void mpv::render(GemState *state)
     if(m_mpv_gl)
     {
       mpv_opengl_fbo mpfbo{static_cast<int>(m_frameBufferIndex), m_width, m_height, 0};
-      mpv_opengl_init_params gl_init_params{get_proc_address_mpv, nullptr, nullptr};
+      mpv_opengl_init_params gl_init_params{get_proc_address_mpv, nullptr};
       int flip_y{1};
       mpv_render_param params[] = {
         {MPV_RENDER_PARAM_API_TYPE, const_cast<char *>(MPV_RENDER_API_TYPE_OPENGL)},
@@ -430,7 +440,7 @@ void mpv::startRendering(void)
   // This makes mpv use the currently set GL context. It will use the callback
   // to resolve GL builtin functions, as well as extensions.
   mpv_opengl_fbo mpfbo{static_cast<int>(m_frameBufferIndex), m_width, m_height, 0};
-  mpv_opengl_init_params gl_init_params{get_proc_address_mpv, nullptr, nullptr};
+  mpv_opengl_init_params gl_init_params{get_proc_address_mpv, nullptr};
   int flip_y{1};
 
   mpv_render_param params[] = {

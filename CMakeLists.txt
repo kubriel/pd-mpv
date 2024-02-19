@@ -64,7 +64,7 @@ if(APPLE)
       PROPERTIES
       LINK_DIRECTORIES "${LIBMPV_DIRECTORY}"
     )
-elseif()
+else()
     if(${OSSIA_ARCHITECTURE} MATCHES "arm")
         set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".l_arm")
     elseif(${OSSIA_ARCHITECTURE} MATCHES "x86")
