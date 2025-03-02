@@ -83,7 +83,7 @@ static void node_to_atom(const mpv_node* node, std::vector<t_atom>& res)
     case MPV_FORMAT_BYTE_ARRAY:
     case MPV_FORMAT_NODE_MAP:
     {
-      error("could not handle this node format : %d", node->format);
+      pd_error(0, "could not handle this node format : %d", node->format);
       break;
     }
     case MPV_FORMAT_NODE:

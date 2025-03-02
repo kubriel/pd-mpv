@@ -12,6 +12,7 @@ endif()
 
 set(PUREDATA_INCLUDE_DIRS "" CACHE PATH "Path to folder containing m_pd.h" )
 set(GEM_INCLUDE_DIRS "" CACHE PATH "Path to Gem header folder")
+#set(GEM_INCLUDE_DIRS "path_to_custom_Gem/src" CACHE PATH "Path to custom Gem header folder")
 find_package(PkgConfig)
 set(ENV{PKG_CONFIG_PATH} "/usr/local/lib/pkgconfig/;/usr/lib/pkgconfig/")
 pkg_check_modules(GEM Gem)

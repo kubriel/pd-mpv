@@ -111,7 +111,7 @@ struct node_builder {
           {
             if(n > m_types.size())
             {
-              error("types size < argc");
+              pd_error(0, "types size < argc");
             }
             else
               tag = m_types.at(n);
@@ -121,7 +121,7 @@ struct node_builder {
       }
       return;
     fail:
-      error("can't process command");
+      pd_error(0, "can't process command");
       dst->format = MPV_FORMAT_NONE;
     }
 
